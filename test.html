@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Test</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        header {
+            background-color: #4CAF50;
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 1em 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        
+        main {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 2em;
+            width: 90%;
+            max-width: 600px;
+            margin-top: 70px;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: white;
+        }
+
+        label {
+            display: block;
+            margin: 1em 0 0.5em;
+            font-weight: bold;
+            color: #555;
+            font-size: 1.2rem;
+            text-align: left;
+        }
+
+        .input-container {
+            margin-bottom: 1.5em;
+            padding: 1em;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .radio-group {
+            display: flex;
+            justify-content: space-between; /* Space out items */
+            flex-wrap: wrap; /* Wrap items to the next line if needed */
+        }
+
+        .radio-group label {
+            flex: 1; /* Allow labels to expand */
+            margin: 0;
+            font-size: 1rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center text and input */
+            padding: 0.5em;
+            box-sizing: border-box;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 0.5em;
+            cursor: pointer;
+        }
+
+        button {
+            margin-top: 2em;
+            padding: 1em 2em;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            background-color: #388e3c;
+        }
+
+        #recommendation,
+        #chart-container {
+            display: none; /* Hide initially */
+            margin-top: 2em;
+            font-size: 1.2rem;
+            color: #333;
+            text-align: center;
+        }
+
+        #chart-container {
+            text-align: center;
+        }
+
+        canvas {
+            width: 100% !important;
+            max-width: 500px;
+            height: 300px !important;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        @media screen and (max-width: 500px) {
+            canvas {
+                height: 250px !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Health Test</h1>
+    </header>
+    <main>
+        <form id="health-test-form">
+            <div class="input-container">
+                <label>How many servings of fruits did you have today?</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" id="fruits-0" name="fruits" value="0" required>
+                        None
+                    </label>
+                    <label>
+                        <input type="radio" id="fruits-1-2" name="fruits" value="1-2">
+                        1-2
+                    </label>
+                    <label>
+                        <input type="radio" id="fruits-3+" name="fruits" value="3+">
+                        3 or more
+                    </label>
+                </div>
+            </div>
+            <div class="input-container">
+                <label>Did you engage in a fun activity today?</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" id="fun-yes" name="fun" value="yes" required>
+                        Yes
+                    </label>
+                    <label>
+                        <input type="radio" id="fun-no" name="fun" value="no">
+                        No
+                    </label>
+                </div>
+            </div>
+            <div class="input-container">
+                <label>How many steps did you take today? 🚶‍♂️🚶‍♀️</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" id="steps-0-5000" name="steps" value="0-5000" required>
+                        0-5000
+                    </label>
+                    <label>
+                        <input type="radio" id="steps-5001-10000" name="steps" value="5001-10000">
+                        5001-10000
+                    </label>
+                    <label>
+                        <input type="radio" id="steps-10001+" name="steps" value="10001+">
+                        10001+
+                    </label>
+                </div>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </main>
+    <div id="recommendation"></div>
+    <div id="chart-container">
+        <canvas id="health-chart"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.getElementById('health-test-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+    
+            // Gather the responses
+            const fruits = document.querySelector('input[name="fruits"]:checked').value;
+            const fun = document.querySelector('input[name="fun"]:checked').value;
+            const steps = document.querySelector('input[name="steps"]:checked').value;
+    
+            // Display recommendations
+            const recommendationDiv = document.getElementById('recommendation');
+            let recommendation = 'Awesome! You seem to be doing great on your health journey. Keep up the good work!';
+            
+            if (fun === 'no') {
+                recommendation = 'It looks like you didn\'t have any fun today. Try to add something enjoyable to your day—it’s great for your well-being!';
+            } else if (fruits === '0') {
+                recommendation = 'Try to include more fruits in your diet. They’re not just tasty but also packed with nutrients!';
+            } else if (steps === '0-5000') {
+                recommendation = 'Consider increasing your step count. Even a short walk can make a difference!';
+            }
+    
+            recommendationDiv.textContent = recommendation;
+            recommendationDiv.style.display = 'block';
+    
+            // Data for chart
+            const chartData = {
+                labels: ['Fruits', 'Fun', 'Steps'],
+                datasets: [{
+                    label: 'Health Metrics',
+                    data: [
+                        fruits === '0' ? 0 : (fruits === '1-2' ? 1 : 2),
+                        fun === 'no' ? 0 : 1,
+                        steps === '0-5000' ? 0 : (steps === '5001-10000' ? 1 : 2)
+                    ],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            };
+    
+            // Create the chart
+            const ctx = document.getElementById('health-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.label + ': ' + tooltipItem.raw;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+    
+            document.getElementById('chart-container').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

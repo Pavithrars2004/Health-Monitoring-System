@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding-top: 60px; /* Adjust padding to prevent content from hiding behind fixed header */
+        }
+        
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1em;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        
+        header h1 {
+            margin: 0;
+        }
+        
+        main {
+            padding: 2em;
+        }
+        
+        form {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 2em;
+            max-width: 600px;
+            margin: auto;
+        }
+        
+        label {
+            display: block;
+            margin: 1em 0 0.5em;
+            font-weight: bold;
+            color: #333;
+            font-size: 1.2rem;
+            text-align: left;
+        }
+        
+        .radio-group {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .radio-group label {
+            flex: 1;
+            margin: 0.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        input[type="radio"] {
+            margin-right: 0.5em;
+            cursor: pointer;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 1em 2em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        
+        button:active {
+            background-color: #388e3c;
+        }
+        
+        #quiz-result {
+            display: none;
+            margin-top: 2em;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 2em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 2em auto;
+            text-align: center;
+        }
+        
+        .result-header {
+            font-size: 1.5rem;
+            margin-bottom: 1em;
+            color: #333;
+        }
+        
+        .result-content {
+            font-size: 1.2rem;
+            margin-bottom: 1em;
+            color: #555;
+        }
+        
+        .result-score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .feedback {
+            font-size: 1.2rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Health Quiz</h1>
+    </header>
+    <main>
+        <form id="quiz-form">
+            <label>How many servings of vegetables should you eat daily?</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="veggies" value="3" required> 3
+                </label>
+                <label>
+                    <input type="radio" name="veggies" value="5"> 5
+                </label>
+                <label>
+                    <input type="radio" name="veggies" value="7"> 7
+                </label>
+            </div>
+            <br>
+            <label>Which of the following is a healthy fat?</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="fat" value="butter" required> Butter
+                </label>
+                <label>
+                    <input type="radio" name="fat" value="olive-oil"> Olive Oil
+                </label>
+                <label>
+                    <input type="radio" name="fat" value="lard"> Lard
+                </label>
+            </div>
+            <br>
+            <label>How much water should you drink daily?</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="water" value="2-liters" required> 2 Liters
+                </label>
+                <label>
+                    <input type="radio" name="water" value="1-liter"> 1 Liter
+                </label>
+                <label>
+                    <input type="radio" name="water" value="0.5-liter"> 0.5 Liter
+                </label>
+            </div>
+            <br>
+            <label>What is a good source of protein?</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="protein" value="tofu" required> Tofu
+                </label>
+                <label>
+                    <input type="radio" name="protein" value="chicken"> Chicken
+                </label>
+                <label>
+                    <input type="radio" name="protein" value="bread"> Bread
+                </label>
+            </div>
+            <br>
+            <label>How many hours of sleep is recommended for adults?</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="sleep" value="6" required> 6
+                </label>
+                <label>
+                    <input type="radio" name="sleep" value="7"> 7
+                </label>
+                <label>
+                    <input type="radio" name="sleep" value="8"> 8
+                </label>
+            </div>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="quiz-result">
+            <div class="result-header">Quiz Results</div>
+            <div class="result-content">
+                <div class="result-score" id="score"></div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.getElementById('quiz-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            let score = 0;
+            
+            // Get selected answers
+            const veggies = document.querySelector('input[name="veggies"]:checked').value;
+            const fat = document.querySelector('input[name="fat"]:checked').value;
+            const water = document.querySelector('input[name="water"]:checked').value;
+            const protein = document.querySelector('input[name="protein"]:checked').value;
+            const sleep = document.querySelector('input[name="sleep"]:checked').value;
+            
+            // Calculate score
+            if (veggies === '5') score++;
+            if (fat === 'olive-oil') score++;
+            if (water === '2-liters') score++;
+            if (protein === 'chicken') score++;
+            if (sleep === '8') score++;
+            
+            // Display result
+            const resultDiv = document.getElementById('quiz-result');
+            const scoreDiv = document.getElementById('score');
+            const feedbackDiv = document.getElementById('feedback');
+            
+            scoreDiv.textContent = `You scored ${score} out of 5`;
+            
+            if (score === 5) {
+                feedbackDiv.textContent = "Fantastic job! You're a health guru!";
+            } else if (score >= 3) {
+                feedbackDiv.textContent = "Great effort! You have a solid understanding of health!";
+            } else {
+                feedbackDiv.textContent = "Keep learning and improving your health knowledge!";
+            }
+            
+            resultDiv.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
